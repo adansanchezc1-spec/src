@@ -4,7 +4,7 @@ try:
     from .models import Producto, Catalogo, Tarjeta_Credito
     from .users import Cliente
     from .logistics import Agente_Deposito, Empresa_Transporte
-    from .support import Gerente_Relaciones
+    from .support import Gerente_Relaciones, Queja
 except ImportError:
     import os
     import sys
@@ -15,7 +15,7 @@ except ImportError:
     from tele_ventas.models import Producto, Catalogo, Tarjeta_Credito
     from tele_ventas.users import Cliente
     from tele_ventas.logistics import Agente_Deposito, Empresa_Transporte
-    from tele_ventas.support import Gerente_Relaciones
+    from tele_ventas.support import Gerente_Relaciones, Queja
 
 from datetime import datetime
 
@@ -76,6 +76,8 @@ def app() -> None:
     transportadora = Empresa_Transporte("Logística Express", "555-0199")
     siguiente_id = 1001
     ordenes_global: list = []
+    lista_quejas: list[Queja] = []
+    gerente = Gerente_Relaciones("GR-1")
 
     while True:
         nombre, correo, rol = autenticar_usuario()
@@ -83,10 +85,9 @@ def app() -> None:
             print("Saliendo de la aplicación.")
             break
 
-        # Agentes y gerente no requieren dirección.
+        # Agentes no requieren dirección.
         cliente = None
         agente = None
-        gerente = None
 
         if rol == "1":
             while True:
@@ -105,13 +106,41 @@ def app() -> None:
         elif rol == "2":
             agente = Agente_Deposito("AG-007")
             print(f"Acceso concedido Agente de Depósito: {nombre} ({correo})")
+            print("El usuario autenticado no usa el flujo de cliente en este prototipo. Volviendo a selección de rol.")
+            continue
         elif rol == "3":
-            gerente = Gerente_Relaciones("GR-1")
             print(f"Acceso concedido Gerente de Relaciones: {nombre} ({correo})")
 
-        if rol != "1":
-            # En este taller el comportamiento principal se centra en Cliente.
-            print("El usuario autenticado no usa el flujo de cliente en este prototipo. Volviendo a selección de rol.")
+            while True:
+                print("\nMenú Gerente de Relaciones:")
+                print("1. Ver todas las quejas")
+                print("2. Responder una queja")
+                print("3. Cerrar sesión de gerente")
+                eleccion = input("Elija opción: ").strip()
+
+                if eleccion == "1":
+                    gerente.leer_quejas(lista_quejas)
+                elif eleccion == "2":
+                    if not lista_quejas:
+                        print("No hay quejas para responder.")
+                        continue
+                    try:
+                        qid = int(input("Ingrese ID de queja a responder: "))
+                    except ValueError:
+                        print("ID inválido, debe ser un número.")
+                        continue
+                    queja_sel = next((q for q in lista_quejas if q.id_queja == qid), None)
+                    if not queja_sel:
+                        print("Queja no encontrada.")
+                        continue
+                    respuesta = input("Ingrese la respuesta del gerente: ")
+                    gerente.responder_queja(queja_sel, respuesta)
+                elif eleccion == "3":
+                    print("Saliendo de sesión gerente y volviendo a selección de rol.")
+                    break
+                else:
+                    print("Opción inválida, inténtelo de nuevo.")
+
             continue
 
         def mostrar_menu() -> None:
@@ -209,7 +238,8 @@ def app() -> None:
                 motivo = input("Motivo de la queja: ")
                 desc = input("Descripción: ")
                 queja = cliente.presentar_queja(motivo, desc)
-                queja.enviar_a_gerente(Gerente_Relaciones("GR-1"))
+                lista_quejas.append(queja)
+                queja.enviar_a_gerente(gerente)
             elif opcion == "9":
                 print("Sesión cerrada. Volviendo al menú principal de roles.")
                 break
