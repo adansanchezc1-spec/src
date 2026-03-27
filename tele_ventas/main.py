@@ -20,6 +20,41 @@ except ImportError:
 from datetime import datetime
 
 
+def autenticar_usuario() -> tuple[str, str, str]:
+    """Autenticación simplificada por rol con validaciones de credenciales."""
+    while True:
+        try:
+            nombre = input("Nombre del usuario: ").strip()
+            correo = input("Correo electrónico: ").strip()
+            if not nombre:
+                print("Nombre no puede estar vacío.")
+                continue
+            if not correo:
+                print("Correo electrónico no puede estar vacío.")
+                continue
+
+            print("\nSeleccione perfil:")
+            print("1. Cliente")
+            print("2. Agente de Depósito")
+            print("3. Gerente de Relaciones")
+            perfil = input("Opción de perfil: ").strip()
+
+            if perfil not in {"1", "2", "3"}:
+                print("Opción inválida, elija 1, 2 o 3.")
+                continue
+
+            if perfil == "3":
+                if nombre != "Carlos Mendoza" or correo != "gerente@televentas.com":
+                    print("Credenciales de Gerente de Relaciones incorrectas.")
+                    continue
+
+            # Roles 1 y 2 aceptan cualquier nombre y correo no vacío.
+            return nombre, correo, perfil
+        except EOFError:
+            print("Ejecución no interactiva detectada. Saliendo.")
+            return "", "", "0"
+
+
 def app() -> None:
     """Punto de entrada principal de la aplicación CLI."""
     catalogo = Catalogo()
@@ -33,19 +68,43 @@ def app() -> None:
         catalogo.agregar_producto(prod)
 
     print("--- BIENVENIDO A TELE-VENTAS ---")
-    try:
-        nombre = input("Nombre del cliente: ")
-        correo = input("Correo electrónico: ")
-        direccion = input("Dirección: ")
-    except EOFError:
-        print("Ejecución no interactiva detectada. Saliendo.")
+
+    nombre, correo, rol = autenticar_usuario()
+    if rol == "0":
         return
-    cliente = Cliente(nombre, correo, direccion)
 
-    agente = Agente_Deposito("AG-007")
+    # Agentes y gerente no requieren dirección.
+    cliente = None
+    agente = None
+    gerente = None
     transportadora = Empresa_Transporte("Logística Express", "555-0199")
-
     siguiente_id = 1001
+    ordenes_global: list = []
+
+    if rol == "1":
+        while True:
+            try:
+                direccion = input("Dirección: ").strip()
+                if not direccion:
+                    print("Dirección no puede estar vacía.")
+                    continue
+                break
+            except EOFError:
+                print("Ejecución no interactiva detectada. Saliendo.")
+                return
+        cliente = Cliente(nombre, correo, direccion)
+        print(f"Acceso concedido Cliente: {nombre} ({correo})")
+    elif rol == "2":
+        agente = Agente_Deposito("AG-007")
+        print(f"Acceso concedido Agente de Depósito: {nombre} ({correo})")
+    elif rol == "3":
+        gerente = Gerente_Relaciones("GR-1")
+        print(f"Acceso concedido Gerente de Relaciones: {nombre} ({correo})")
+
+    if rol != "1":
+        # En este taller el comportamiento principal se centra en Cliente.
+        print("El usuario autenticado no usa el flujo de cliente en este prototipo. Cerrando aplicación.")
+        return
 
     def mostrar_menu() -> None:
         """Muestra el menú principal (PEP 8: función helper)."""
