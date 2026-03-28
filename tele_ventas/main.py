@@ -109,16 +109,17 @@ def app() -> None:
 
             while True:
                 print("\nMenú Agente de Depósito:")
-                print("1. Ver órdenes confirmadas")
-                print("2. Armar pedido")
-                print("3. Asignar transporte a orden")
-                print("4. Cerrar sesión de agente")
+                print("1. Ver órdenes pagadas")
+                print("2. Confirmar orden")
+                print("3. Armar pedido")
+                print("4. Asignar transporte a orden")
+                print("5. Cerrar sesión de agente")
                 opcion_agente = input("Elija opción: ").strip()
 
                 if opcion_agente == "1":
                     ordenes = agente.consultar_ordenes(ordenes_global)
                     if not ordenes:
-                        print("No hay órdenes confirmadas en este momento.")
+                        print("No hay órdenes pagadas en este momento.")
                     else:
                         for o in ordenes:
                             print(o)
@@ -126,6 +127,23 @@ def app() -> None:
                 elif opcion_agente == "2":
                     ordenes = agente.consultar_ordenes(ordenes_global)
                     if not ordenes:
+                        print("No hay órdenes pagadas para confirmar.")
+                        continue
+                    try:
+                        oid = int(input("Ingrese ID de orden a confirmar: "))
+                    except ValueError:
+                        print("ID inválido.")
+                        continue
+                    orden = next((o for o in ordenes if o.id_orden == oid), None)
+                    if not orden:
+                        print("Orden no encontrada o no está pagada.")
+                        continue
+                    orden.actualizar_estado("Confirmada")
+                    print(f"Orden {oid} confirmada.")
+
+                elif opcion_agente == "3":
+                    ordenes_confirmadas = [o for o in ordenes_global if o.estado == "Confirmada"]
+                    if not ordenes_confirmadas:
                         print("No hay órdenes confirmadas para armar.")
                         continue
                     try:
@@ -133,15 +151,15 @@ def app() -> None:
                     except ValueError:
                         print("ID inválido.")
                         continue
-                    orden = next((o for o in ordenes if o.id_orden == oid), None)
+                    orden = next((o for o in ordenes_confirmadas if o.id_orden == oid), None)
                     if not orden:
                         print("Orden no encontrada o no está confirmada.")
                         continue
                     agente.armar_pedido(orden)
 
-                elif opcion_agente == "3":
-                    ordenes = agente.consultar_ordenes(ordenes_global)
-                    if not ordenes:
+                elif opcion_agente == "4":
+                    ordenes_confirmadas = [o for o in ordenes_global if o.estado == "Confirmada"]
+                    if not ordenes_confirmadas:
                         print("No hay órdenes confirmadas para asignar transporte.")
                         continue
                     try:
@@ -149,13 +167,13 @@ def app() -> None:
                     except ValueError:
                         print("ID inválido.")
                         continue
-                    orden = next((o for o in ordenes if o.id_orden == oid), None)
+                    orden = next((o for o in ordenes_confirmadas if o.id_orden == oid), None)
                     if not orden:
                         print("Orden no encontrada o no está confirmada.")
                         continue
                     agente.seleccionar_transporte(transportadora, orden)
 
-                elif opcion_agente == "4":
+                elif opcion_agente == "5":
                     print("Cerrando sesión de Agente de Depósito.")
                     break
 

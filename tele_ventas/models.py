@@ -130,7 +130,7 @@ class Orden_Compra:
         if metodo.validar():
             total = self.calcular_total()
             if metodo.procesar(total):
-                self.actualizar_estado("Confirmada")
+                self.actualizar_estado("Pagada")
                 return True
         return False
 

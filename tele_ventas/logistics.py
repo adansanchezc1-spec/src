@@ -9,8 +9,8 @@ class Agente_Deposito:
         self.identificacion = identificacion
 
     def consultar_ordenes(self, ordenes: list[Orden_Compra]) -> list[Orden_Compra]:
-        """Filtra órdenes en estado Confirmada."""
-        return [o for o in ordenes if o.estado == "Confirmada"]
+        """Filtra órdenes en estado Pagada."""
+        return [o for o in ordenes if o.estado == "Pagada"]
 
     def armar_pedido(self, orden: Orden_Compra) -> None:
         """Arma el paquete y actualiza estado."""
