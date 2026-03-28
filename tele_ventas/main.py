@@ -106,9 +106,65 @@ def app() -> None:
         elif rol == "2":
             agente = Agente_Deposito("AG-007")
             print(f"Acceso concedido Agente de Depósito: {nombre} ({correo})")
-            print("El usuario autenticado no usa el flujo de cliente en este prototipo. Volviendo a selección de rol.")
+
+            while True:
+                print("\nMenú Agente de Depósito:")
+                print("1. Ver órdenes confirmadas")
+                print("2. Armar pedido")
+                print("3. Asignar transporte a orden")
+                print("4. Cerrar sesión de agente")
+                opcion_agente = input("Elija opción: ").strip()
+
+                if opcion_agente == "1":
+                    ordenes = agente.consultar_ordenes(ordenes_global)
+                    if not ordenes:
+                        print("No hay órdenes confirmadas en este momento.")
+                    else:
+                        for o in ordenes:
+                            print(o)
+
+                elif opcion_agente == "2":
+                    ordenes = agente.consultar_ordenes(ordenes_global)
+                    if not ordenes:
+                        print("No hay órdenes confirmadas para armar.")
+                        continue
+                    try:
+                        oid = int(input("Ingrese ID de orden a armar: "))
+                    except ValueError:
+                        print("ID inválido.")
+                        continue
+                    orden = next((o for o in ordenes if o.id_orden == oid), None)
+                    if not orden:
+                        print("Orden no encontrada o no está confirmada.")
+                        continue
+                    agente.armar_pedido(orden)
+
+                elif opcion_agente == "3":
+                    ordenes = agente.consultar_ordenes(ordenes_global)
+                    if not ordenes:
+                        print("No hay órdenes confirmadas para asignar transporte.")
+                        continue
+                    try:
+                        oid = int(input("Ingrese ID de orden a enviar: "))
+                    except ValueError:
+                        print("ID inválido.")
+                        continue
+                    orden = next((o for o in ordenes if o.id_orden == oid), None)
+                    if not orden:
+                        print("Orden no encontrada o no está confirmada.")
+                        continue
+                    agente.seleccionar_transporte(transportadora, orden)
+
+                elif opcion_agente == "4":
+                    print("Cerrando sesión de Agente de Depósito.")
+                    break
+
+                else:
+                    print("Opción inválida, inténtelo de nuevo.")
+
             continue
         elif rol == "3":
+
             print(f"Acceso concedido Gerente de Relaciones: {nombre} ({correo})")
 
             while True:
@@ -218,6 +274,7 @@ def app() -> None:
                         tarjeta = Tarjeta_Credito(num, cliente.nombre, fecha)
                         if orden.procesar_pago(tarjeta):
                             print("Pago procesado con éxito.")
+                            ordenes_global.append(orden)  # Agregar a la lista global para que el agente pueda consultarla
                             agente.armar_pedido(orden)
                             agente.seleccionar_transporte(transportadora, orden)
                         else:
