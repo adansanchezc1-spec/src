@@ -113,10 +113,11 @@ class SistemaMuseo:
                 return "director", self.director
             if rol == "visitante":
                 return "visitante", Visitante()
-            print("\n--- MENÚ ENCARGADO ---")
-            print("1. Introducir nueva obra")
-            print("2. Consultar catálogo")
-            print("3. Salir")
+
+    def menu_encargado(self, usuario: Encargado_Catalogo) -> None:
+        """Menú para encargado de catálogo."""
+        while True:
+            usuario.mostrar_menu()
             opcion = input("Opción: ")
             if opcion == "1":
                 tipo = input("Tipo (cuadro/escultura/otro): ").strip().lower()
@@ -163,18 +164,36 @@ class SistemaMuseo:
 
                 estado = input("Estado inicial (expuesta/restauracion/danada/cedida): ").strip().lower()
                 if estado == "restauracion":
-                    obra.cambiar_estado(EstadoObra.RESTAURACION)
+                    usuario.asignar_estado(obra, EstadoObra.RESTAURACION)
                 elif estado == "danada":
-                    obra.cambiar_estado(EstadoObra.DANADA)
+                    usuario.asignar_estado(obra, EstadoObra.DANADA)
                 elif estado == "cedida":
-                    obra.cambiar_estado(EstadoObra.CEDIDA)
+                    usuario.asignar_estado(obra, EstadoObra.CEDIDA)
                 else:
-                    obra.cambiar_estado(EstadoObra.EXPUESTA)
+                    usuario.asignar_estado(obra, EstadoObra.EXPUESTA)
 
             elif opcion == "2":
                 self._consultar_catalogo()
             elif opcion == "3":
+                self._consultar_catalogo()
+                try:
+                    idx = int(input("\nSeleccione número de obra: ")) - 1
+                    obra = self.catalogo[idx]
+                    seleccion = input("Estado (expuesta/restauracion/danada/cedida): ").strip().lower()
+                    if seleccion == "restauracion":
+                        usuario.asignar_estado(obra, EstadoObra.RESTAURACION)
+                    elif seleccion == "danada":
+                        usuario.asignar_estado(obra, EstadoObra.DANADA)
+                    elif seleccion == "cedida":
+                        usuario.asignar_estado(obra, EstadoObra.CEDIDA)
+                    else:
+                        usuario.asignar_estado(obra, EstadoObra.EXPUESTA)
+                except (ValueError, IndexError):
+                    print("Entrada inválida")
+            elif opcion == "4":
                 break
+            else:
+                print("Opción inválida")
 
     def menu_restaurador(self, usuario: Restaurador_Jefe) -> None:
         """Menú para restaurador jefe."""

@@ -115,6 +115,11 @@ class Obra_Arte(ABC):
         """Sala donde está expuesta la obra (solo lectura)."""
         return self._sala
 
+    @property
+    def estado(self) -> EstadoObra:
+        """Estado actual de la obra (solo lectura)."""
+        return self._estado
+
     def asignar_sala(self, sala) -> None:
         """Asigna la sala a la obra."""
         self._sala = sala

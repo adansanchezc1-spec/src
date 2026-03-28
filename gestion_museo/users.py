@@ -28,11 +28,28 @@ class Usuario(ABC):
 class Encargado_Catalogo(Usuario):
     """Rol responsable de registrar nuevas obras."""
 
+    def inscribir_obra(self, catalogo: List[Obra_Arte], obra: Obra_Arte) -> None:
+        """Inscribe una obra en el catálogo."""
+        catalogo.append(obra)
+        print(f"[Catálogo] Obra '{obra.titulo}' inscrita exitosamente.")
+
+    def asignar_estado(self, obra: Obra_Arte, estado: EstadoObra) -> None:
+        """Asigna un estado a una obra."""
+        obra.cambiar_estado(estado)
+        print(f"[Catálogo] Estado de '{obra.titulo}' cambiado a: {estado.value}.")
+
+    def mostrar_menu(self) -> None:
+        """Muestra las opciones del encargado del catálogo."""
+        print("\n--- MENÚ ENCARGADO CATALOGO ---")
+        print("1. Registrar obra")
+        print("2. Consultar catálogo")
+        print("3. Cambiar estado de obra")
+        print("4. Salir")
+
     def introducir_obra(self, catalogo: List[Obra_Arte], tipo: str, **kwargs) -> Obra_Arte:
         """Registra una nueva obra usando la fábrica."""
         nueva_obra = ObraFactory.crear_obra(tipo, **kwargs)
-        catalogo.append(nueva_obra)
-        print(f"[Catálogo] Obra '{nueva_obra.titulo}' registrada exitosamente.")
+        self.inscribir_obra(catalogo, nueva_obra)
         return nueva_obra
 
 
