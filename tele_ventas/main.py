@@ -158,18 +158,18 @@ def app() -> None:
                     agente.armar_pedido(orden)
 
                 elif opcion_agente == "4":
-                    ordenes_confirmadas = [o for o in ordenes_global if o.estado == "Confirmada"]
-                    if not ordenes_confirmadas:
-                        print("No hay órdenes confirmadas para asignar transporte.")
+                    ordenes_empaquetadas = [o for o in ordenes_global if o.estado == "Empaquetado"]
+                    if not ordenes_empaquetadas:
+                        print("No hay órdenes empaquetadas para asignar transporte.")
                         continue
                     try:
                         oid = int(input("Ingrese ID de orden a enviar: "))
                     except ValueError:
                         print("ID inválido.")
                         continue
-                    orden = next((o for o in ordenes_confirmadas if o.id_orden == oid), None)
+                    orden = next((o for o in ordenes_empaquetadas if o.id_orden == oid), None)
                     if not orden:
-                        print("Orden no encontrada o no está confirmada.")
+                        print("Orden no encontrada o no está empaquetada.")
                         continue
                     agente.seleccionar_transporte(transportadora, orden)
 
@@ -293,8 +293,6 @@ def app() -> None:
                         if orden.procesar_pago(tarjeta):
                             print("Pago procesado con éxito.")
                             ordenes_global.append(orden)  # Agregar a la lista global para que el agente pueda consultarla
-                            agente.armar_pedido(orden)
-                            agente.seleccionar_transporte(transportadora, orden)
                         else:
                             print("Fallo el procesamiento del pago.")
                 else:
